@@ -1,0 +1,249 @@
+<odoo>
+	<data>
+		<template id="picking_up_list_report_document">
+			<div class="header">
+				<table width="100%" border="0" cellspacing="0" cellpadding="0"
+					t-attf-style="margin:0; font-family: Arial,Helvetica, sans-serif; background:#fff;">
+					<tbody>
+						<tr>
+							<th align="left"
+								style=" width:20%; font-size:12px; padding: 0 0 0px 0; line-height:16px;">
+								<img align="center" t-if="doc.company_id.logo"
+									t-att-src="'data:image/png;base64,%s' %  doc.company_id.logo"
+									style="max-height: 50px;" />
+							</th>
+							<th style="width:20%;font-size:18px;text-align:center">
+
+								PICK LIST
+
+							</th>
+							<th style="width:60%; font-size:14px;">
+
+							</th>
+						</tr>
+						<tr>
+							<td style="width: 20%; font-size: 20px; height: 49px;">
+								Created:
+								<span t-esc="doc.calculate_date_time()" />
+							</td>
+							<td style="width: 20%; height: 49px;">
+							</td>
+							<td style="width: 60%; height: 49px;">
+							</td>
+						</tr>
+						<tr>
+							<td style="font-size: 16px; width: 40%;">
+								Created By:
+								<span t-attf-style="color: #000000;"
+									t-field="doc.current_user_id.name" />
+							</td>
+							<td style="width: 20%; height: 49px;">
+							</td>
+							<td style="width: 40%; height: 49px;">
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<t t-call="web.internal_layout">
+				<div class="page">
+					<table style="border: 1px solid black; width: 100%;"
+						border="1">
+						<tbody>
+							<tr style="border: 1px solid black; background-color:#D3D3D3;">
+								<td style="border: 1px solid black; width: 5%; height: 49px;"
+									align="center">
+									<strong>S. No.</strong>
+								</td>
+								<td style="border: 1px solid black; width: 10%;"
+									align="center">
+									<strong>SKU</strong>
+								</td>
+								<td style="border: 1px solid black; width: 20%;"
+									align="center">
+									<strong>UPC Barcode</strong>
+								</td>
+								<td style="border: 1px solid black; width: 30%;"
+									align="center">
+									<strong>SKU Name</strong>
+								</td>
+								<td style="border: 1px solid black; width: 15%;"
+									align="center">
+									<strong>Quantity</strong>
+								</td>
+								<td style="border: 1px solid black; width: 20%;"
+									align="center">
+									<strong>Pick Location</strong>
+								</td>
+							</tr>
+
+							<t t-foreach="doc.move_lines" t-as="l">
+								<t t-if="l.move_line_ids">
+									<t t-foreach="l.move_line_ids" t-as="o">
+										<t t-if="l_odd">
+											<tr style="background-color:#D3D3D3;">
+												<td
+													style="border: 1px solid black; width: 
+										5%; height: 49px;"
+													align="right">
+													<span t-esc="l_index+1" />
+												</td>
+												<td style="border: 1px solid black; width: 10%;"
+													align="right">
+													<span t-field="l.product_id.default_code" />
+												</td>
+												<td
+													style="border: 1px solid black; width: 20%; vertical-align:middle;"
+													align="center">
+													<img t-if="l.product_id.barcode"
+														t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+		                                              % ('Code128', l.product_id.barcode, 150, 32)" />
+												</td>
+												<td style="border: 1px solid black; width: 30%;"
+													align="left">
+													<span t-field="l.product_id.name" />
+												</td>
+												<td
+													style="border: 1px solid black; width: 
+														15%;"
+													align="right">
+													<span t-field="o.qty_done" />
+												</td>
+												<td style="border: 1px solid black; width: 20%;"
+													align="left">
+													<span t-field="o.location_id.name" />
+												</td>
+											</tr>
+										</t>
+										<t t-if="l_even">
+											<tr>
+												<td
+													style="border: 1px solid black; width: 
+												5%;height: 49px;"
+													align="right">
+													<span t-esc="l_index+1" />
+												</td>
+												<td style="border: 1px solid black; width: 10%;"
+													align="right">
+													<span t-field="l.product_id.default_code" />
+												</td>
+												<td
+													style="border: 1px solid black; width: 20%;vertical-align:middle;"
+													align="center">
+													<img t-if="l.product_id.barcode"
+														t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+                                     			% ('Code128', l.product_id.barcode, 150, 32)" />
+												</td>
+												<td style="border: 1px solid black; width: 30%;"
+													align="left">
+													<span t-field="l.product_id.name" />
+												</td>
+												<td
+													style="border: 1px solid black; width: 
+												15%;"
+													align="right">
+													<span t-field="o.qty_done" />
+												</td>
+												<td style="border: 1px solid black; width: 20%;"
+													align="left">
+													<span t-field="o.location_id.name" />
+												</td>
+											</tr>
+										</t>
+									</t>
+								</t>
+								<t t-else="">
+									<t t-if="l_odd">
+										<tr style="background-color:#D3D3D3;">
+											<td
+												style="border: 1px solid black; width: 
+										5%; height: 49px;"
+												align="right">
+												<span t-esc="l_index+1" />
+											</td>
+											<td style="border: 1px solid black; width: 10%;"
+												align="right">
+												<span t-field="l.product_id.default_code" />
+											</td>
+											<td
+												style="border: 1px solid black; width: 20%; vertical-align:middle;"
+												align="center">
+												<img t-if="l.product_id.barcode"
+													t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+		                                              % ('Code128', l.product_id.barcode, 150, 32)" />
+											</td>
+											<td style="border: 1px solid black; width: 30%;"
+												align="left">
+												<span t-field="l.product_id.name" />
+											</td>
+											<td
+												style="border: 1px solid black; width: 
+														15%;"
+												align="right">
+												<span t-field="l.quantity_done" />
+											</td>
+											<td style="border: 1px solid black; width: 20%;"
+												align="left">
+												<span t-field="l.location_id.name" />
+											</td>
+										</tr>
+									</t>
+									<t t-if="l_even">
+										<tr>
+											<td
+												style="border: 1px solid black; width: 
+												5%;height: 49px;"
+												align="right">
+												<span t-esc="l_index+1" />
+											</td>
+											<td style="border: 1px solid black; width: 10%;"
+												align="right">
+												<span t-field="l.product_id.default_code" />
+											</td>
+											<td
+												style="border: 1px solid black; width: 20%;vertical-align:middle;"
+												align="center">
+												<img t-if="l.product_id.barcode"
+													t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+                                     			% ('Code128', l.product_id.barcode, 150, 32)" />
+											</td>
+											<td style="border: 1px solid black; width: 30%;"
+												align="left">
+												<span t-field="l.product_id.name" />
+											</td>
+											<td
+												style="border: 1px solid black; width: 
+												15%;"
+												align="right">
+												<span t-field="l.quantity_done" />
+											</td>
+											<td style="border: 1px solid black; width: 20%;"
+												align="left">
+												<span t-field="l.location_id.name" />
+											</td>
+										</tr>
+									</t>
+								</t>
+							</t>
+						</tbody>
+					</table>
+					<!-- <p> <span style="color: #ffffff;">asdf</span> </p> <table style="border-collapse: 
+						collapse; width: 100%;" border="1"> <tbody> <tr> <td style="width: 50%; height: 
+						24px;"> Total Qty Order For Pick No. <span t-field="doc.tot_order_qty_picked" 
+						/> </td> <td style="width: 50%; height: 24px;"> Packer Name: <span t-attf-style="color: 
+						#000000;" t-field="doc.packer_name" /> </td> </tr> <tr> <td style="width: 
+						50%; height: 24px;">Total Qty Picked:</td> <td style="width: 50%; height: 
+						24px;">Packer Sign:</td> </tr> </tbody> </table> -->
+				</div>
+			</t>
+		</template>
+		<template id="pick_up_list_report_template">
+			<t t-call="web.html_container">
+				<t t-foreach="docs" t-as="doc">
+					<t t-call="verts_v11_fabhabitat.picking_up_list_report_document" />
+				</t>
+			</t>
+		</template>
+	</data>
+</odoo>
+

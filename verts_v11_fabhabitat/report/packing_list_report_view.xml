@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="report_packing_list_document">
+		<!-- t t-call="report.html_container" -->
+			<t t-call="web.internal_layout">
+				<t t-foreach="docs" t-as="o">
+				<div class="col-xs-4">
+					<table style="border-spacing:0;margin-bottom:0;width: 100%;"
+					class="table">
+						<tr>
+							<td valign="top" align="right">
+								<img style="max-height:40px;" t-att-src="'data:image/png;base64,%s' % o.company_id.logo" t-if="o.company_id.logo"/>
+							</td>
+						</tr>
+						<tr t-attf-style="font-size=15px;">
+							<td valign="top" align="left">
+								Packing Slip No.:<span t-raw="o.name" />
+								<br />
+								Order No:<span t-raw="o.origin" />
+								<br />
+								Date:<span t-raw="o.scheduled_date" />
+							</td>
+						</tr>
+					</table>
+				</div>
+				<table style="border-spacing:0;margin-bottom:0;width: 100%;" class="table" border="1">
+					<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px; border:1 solid #888;">
+						<td align="center" width="50%" valign="top">
+							<b>
+								<span>Billing Address</span>
+							</b>
+						</td>
+						<td align="center" wi1th="50%" valign="top">
+							<b>
+								<span>Shipping Address</span>
+							</b>
+						</td>
+					</tr>
+					<tr t-attf-style="font-size:11px; border:1 solid #888;">
+						<td align="left" width="50%" valign="top">
+							<span t-raw="o.partner_id.street" /><br/>
+							<span t-raw="o.partner_id.city" /><br/>
+							<span t-raw="o.partner_id.zip" /><br/>
+							<span t-raw="o.partner_id.country_id.name" /><br/>
+							</td>
+						<td align="left" width="50%" valign="top">
+							<span t-raw="o.partner_id.street" /><br/>
+							<span t-raw="o.partner_id.city" /><br/>
+							<span t-raw="o.partner_id.zip" /><br/>
+							<span t-raw="o.partner_id.country_id.name" /><br/>
+							</td>
+					</tr>
+				</table>
+				<p />
+				<table style="border-spacing:0;margin-bottom:0;width: 100%;" class="table table-bordered" border="1">
+					<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px; border:1 solid #888;">
+						<td align="center" valign="top" width="50%">
+							<b>
+								<span>Payment Information</span>
+							</b>
+						</td>
+						<td align="center" width="50%" valign="top">
+							<b>
+								<span>Shipping information</span>
+							</b>
+						</td>
+					</tr>
+					<tr t-attf-style="font-size:11px;">
+						<td align="left" width="50%" valign="top">Purchase Order No.<br/>
+							<span t-raw="o.po_order_number" />
+						</td>
+						<td align="left" width="50%" valign="top">
+							[[Shippping Plan Name]]
+							<table style="border-spacing:0;margin-bottom:0;width: 100%;" class="table">
+								<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px;">
+									<td align="center" width="50%">
+										<b>
+											<span>Carrier</span>
+										</b>
+									</td>
+									<td align="center" width="50%">
+										<b>
+											<span>Tracking No.</span>
+										</b>
+									</td>
+								</tr>
+								<tr>
+									<td align="center" width="50%">
+										<span t-raw="o.shipping_carrier" />
+									</td>
+									<td align="center" width="50%">
+										<span t-raw="o.shipping_account_number" />
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				<p />
+				<p />
+				<table style="border-spacing:0;margin-bottom:0;width: 100%;" border="1" class="table">
+					<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px;">
+						<td align="left" width="20%" valign="top">
+							<b>
+								<span>Qty</span>
+							</b>
+						</td>
+						<td align="left" width="50%" valign="top">
+							<b>
+								<span>Product</span>
+							</b>
+						</td>
+						<td align="left" wi1th="30%" valign="top">
+							<b>
+								<span>SKU</span>
+							</b>
+						</td>
+					</tr>
+					<t t-foreach="o.move_lines" t-as="l">
+					<tr t-attf-style="font-size:11px;">
+						
+						<td align="left" width="20%" valign="top"><span t-raw="l.product_qty" /></td>
+						<td align="left" width="50%" valign="top"><span t-raw="l.product_id.name" /></td>
+						<td align="left" width="30%" valign="top"><span t-raw="l.product_id.default_code" /></td>
+						
+					</tr>
+					</t>
+				</table>
+			</t>
+		</t>
+	</template>
+</odoo>

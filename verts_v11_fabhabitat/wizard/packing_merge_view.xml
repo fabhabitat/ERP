@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<odoo>
+	<record id="packing_list_wiz_form" model="ir.ui.view">
+		<field name="name">packing.list.wiz.form</field>
+		<field name="model">packing.list.wiz</field>
+		<field name="arch" type="xml">
+			<form string="Print Packing List">
+				<footer>
+					<button name="merge_attachment" string="Merge Attachments" type="object" class="btn
+						btn-sm btn-primary"/>
+					<button string="Cancel" class="btn btn-sm btn-default" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+	
+	<record id="packing_list_wiz_action" model="ir.actions.act_window">
+		<field name="name">Print Packing List</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">packing.list.wiz</field>
+		<field name="view_mode">form</field>
+		<field name="view_id" ref="packing_list_wiz_form"/>
+		<field name="target">new</field>
+	</record>
+	
+	<record id="packing_list_view" model="ir.ui.view">
+        <field name="name">Print Packing List</field>
+        <field name="model">view.report</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+	       <form string="Print Packing List" version="7.0" >
+        	<sheet>
+        		<group col="4" colspan="2">
+	        		<field name="file_name" filename="datas_fname" />
+					<field name="datas_fname" />
+            	</group>
+			</sheet>
+		   </form>
+		 </field>
+	  </record>
+	
+	<act_window id="action_packing_list_wiz" name="Print Packing List" multi="True"
+		key2="client_action_multi" res_model="packing.list.wiz" src_model="stock.picking"
+		view_mode="form" target="new" view_type="form" groups="base.group_system"
+		/>
+</odoo>

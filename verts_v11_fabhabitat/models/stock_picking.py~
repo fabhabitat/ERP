@@ -1,0 +1,309 @@
+from odoo import api,fields,models,_
+from datetime import datetime
+import os
+from odoo.tools import pdf
+from odoo.exceptions import UserError
+import base64
+import xlrd
+import requests
+from datetime import datetime, date,timedelta
+# try:
+#     from cStringIO import StringIO
+# except:
+#     from StringIO import StringIO
+# from pyPdf import PdfFileWriter, PdfFileReader
+import logging
+import io
+
+params = None
+log = logging.getLogger(__name__)
+
+
+# from delivery_ups.models.ups_request import UPSRequest, Package
+
+class Picking(models.Model):
+    _inherit = "stock.picking"
+    _order = "name desc"
+    
+
+    customer_zip_code=fields.Char('Shipping Zip Code')
+    shipping_carrier=fields.Char('Shipping Carrier Name')
+    ship_date=fields.Char('Ship Date')
+    method_of_shipment=fields.Char('Method of shipment')
+    comments=fields.Char('Comments')
+    ref1=fields.Char('Ref1')
+    ref2=fields.Char('Ref2')
+    document_to_print=fields.Char('Document To Print')
+    ship_from_company=fields.Char('Ship From Company')
+    ship_from_address=fields.Char('Ship From Address')
+    shipping_account_number=fields.Integer('Shipping Account Number')
+    shipping_account_zip_code=fields.Integer('Shipping Account zip code')
+    invoice_required=fields.Boolean('Invoice Required')
+    packing_list_required=fields.Boolean('Packing List Required')
+    po_order_number=fields.Char('Purchase Order No.')
+    invoice_id=fields.Many2one('account.invoice','Invoice')
+    tracking_no = fields.Char('Tracking No')
+    ship_label_bool=fields.Boolean('Shipping Label')
+    current_user_id = fields.Many2one('res.users', 'Responsible',default=lambda self:self.env.uid)
+    billing_type = fields.Selection([('tpb', 'TPB'), ('prepaid', 'Prepaid'), ('fix', 'Fixed')], 'Billing Type')
+    
+#     address fields
+    street = fields.Char()
+    street2 = fields.Char()
+    zip = fields.Char(change_default=True)
+    city = fields.Char()
+    state_id = fields.Many2one("res.country.state", string='State', ondelete='restrict')
+    country_id = fields.Many2one('res.country', string='Country', ondelete='restrict') 
+    current_date = fields.Datetime("Current Date")
+    
+    @api.multi
+    def calculate_date_time(self):
+        pick_list_date  = " "
+        self.current_date = datetime.now()
+        po_date = datetime.strptime(self.current_date, '%Y-%m-%d %H:%M:%S')
+        po_date_new = po_date+timedelta(hours=5,minutes=30)
+        new_po_date = po_date_new.strftime('%Y-%m-%d %H:%M:%S')
+        pick_list_date = new_po_date
+        return pick_list_date
+        
+    
+    @api.multi
+    def send_to_shipper(self):
+        if not self.ship_label_bool:
+            self.ensure_one()
+            res = self.carrier_id.send_shipping(self)[0]
+            if not self.carrier_tracking_ref:
+                self.carrier_tracking_ref = res['tracking_number']
+            self.carrier_price = res['exact_price']
+            order_currency = self.sale_id.currency_id or self.company_id.currency_id
+            msg = _("Shipment sent to carrier %s for shipping with tracking number %s<br/>Cost: %.2f %s") % (self.carrier_id.name, self.carrier_tracking_ref, self.carrier_price, order_currency.name)
+            self.message_post(body=msg)
+    
+    @api.multi
+    def api_create_record(self,vals):
+        if 'picking_type_id' in vals and vals['picking_type_id']:
+            picking_type_id = self.env['stock.picking.type'].search([('name','=',vals['picking_type_id'])],limit=1)
+            if picking_type_id:
+                vals['picking_type_id'] = picking_type_id.id
+        if 'invoice_id' in vals and vals['invoice_id']:
+            invoice_id = self.env['account.invoice'].search([('number','=',vals['invoice_id'])],limit=1)
+            if invoice_id:
+                vals['invoice_id'] = invoice_id.id
+        if 'location_id' in vals and vals['location_id']:
+            location_id = self.env['stock.location'].search([('name','=',vals['location_id'])],limit=1)
+            if location_id:
+                vals['location_id'] = location_id.id
+        if 'location_dest_id' in vals and vals['location_dest_id']:
+            location_dest_id = self.env['stock.location'].search([('name','=',vals['location_dest_id'])],limit=1)
+            if location_dest_id:
+                vals['location_dest_id'] = location_dest_id.id
+        if 'move_lines' in vals and vals['move_lines']:
+            location_dest_id = self.env['stock.location'].search([('name','=',vals['move_lines'][0]['location_dest_id'])],limit=1)
+            if location_dest_id:
+                vals['move_lines'][0]['location_dest_id'] = location_dest_id.id
+            location_id = self.env['stock.location'].search([('name','=',vals['move_lines'][0]['location_id'])],limit=1)
+            if location_id:
+                vals['move_lines'][0]['location_id'] = location_id.id
+            product_id = self.env['product.product'].search([('name','=',vals['move_lines'][0]['product_id'])],limit=1)
+            if product_id:
+                vals['move_lines'][0]['product_id'] = product_id.id
+                vals['move_lines'][0]['name'] = product_id.name
+                vals['move_lines'][0]['date_expected'] = datetime.now()
+        msg=""
+        try:
+            if picking_type_id.name == 'Delivery Orders':
+                record = self.create({'picking_type_id':vals['picking_type_id'],
+                                    'origin':vals['origin'],
+                                    'po_order_number':vals['po_order_number'],
+                                    'invoice_id':vals['invoice_id'],
+                                    'packing_list_required':vals['packing_list_required'],
+                                    'move_type':vals['move_type'],
+                                    'location_id':vals['location_id'],
+                                    'location_dest_id':vals['location_dest_id'],
+                                    'move_lines' : [(0,0,{'location_id':vals['move_lines'][0]['product_id'],
+                                                          'location_dest_id':vals['move_lines'][0]['location_dest_id'],
+                                                          'product_id':vals['move_lines'][0]['product_id'],
+                                                          'name':vals['move_lines'][0]['name'],
+                                                          'date_expected':datetime.now(),
+                                                          'product_uom':product_id.uom_id.id,
+                                                          'product_uom_qty':vals['move_lines'][0]['product_uom_qty'] })]
+                                    })
+                msg= record.id
+        except Exception as e:
+            msg = "API Error: %s" %e
+        return msg 
+        
+
+    @api.model
+    def api_xmlrpc_create_record(self,vals):  
+        product_ids=False
+	    
+        client = str(vals.get('client', ' '))
+        sku_list = vals.get('sku_list', '')
+        po_no = str(vals.get('po_no', ''))
+        carrier_tracking_ref = str(vals.get('carrier_tracking_ref', ''))
+        ship_to_name = str(vals.get('ship_to_name', ''))
+        ship_to_email = str(vals.get('ship_to_email', ''))
+        ship_address = str(vals.get('ship_address', ''))
+        ship_city = str(vals.get('ship_city', ''))
+        ship_state = str(vals.get('ship_state', ''))
+        ship_zip = str(vals.get('ship_zip', ''))
+        ship_country = str(vals.get('ship_country', ''))
+        ship_phone = str(vals.get('ship_phone', ''))
+        date_ship = vals.get('date_ship', '')
+        method_of_shipment = str(vals.get('method_of_shipment', ''))
+        comments = str(vals.get('comments', ''))
+        ref1 = str(vals.get('ref1', ''))
+        ref2 = str(vals.get('ref2', ''))
+        shipping_account_number = str(vals.get('shipping_account_number', ''))
+        shipping_account_zip_code = str(vals.get('shipping_account_zip_code', ''))
+        billing_type = vals.get('billing_type', '')
+        document_to_print = str(vals.get('document_to_print', ''))
+        ship_from_company = str(vals.get('ship_from_company', ''))
+        ship_from_address = str(vals.get('ship_from_address', ''))
+        
+        picking_type_id = self.sudo().env['stock.picking.type'].search([('code', '=', 'outgoing')], limit=1)
+        if picking_type_id.default_location_src_id:
+            location_id = picking_type_id.default_location_src_id.id
+        else:
+            customerloc, location_id = self.sudo().env['stock.warehouse']._get_partner_locations()
+             
+        if ship_to_name:
+            res_country_id = self.sudo().env['res.country'].search([('code', '=', ship_country)])
+            res_state_id = self.sudo().env['res.country.state'].search([('name', '=', ship_state)])
+            res_partner_id= self.sudo().env['res.partner'].search([('email','=',client)])
+            if not res_partner_id:
+                res_partner_id = self.sudo().env['res.partner'].create({'name':ship_to_name,
+                                                                   'email':ship_to_email,
+                                                                   'street':ship_address,
+                                                                   'city':ship_city,
+                                                                   'state_id':res_state_id.id,
+                                                                    'zip':ship_zip,
+                                                                   'country_id':res_country_id.id,
+                                                                   'phone':ship_phone,
+                                                                })
+                 
+            if  res_partner_id and location_id and picking_type_id:
+                if picking_type_id.default_location_dest_id:
+                    location_dest_id = picking_type_id.default_location_dest_id.id
+                elif res_partner_id:
+                    location_dest_id = res_partner_id.property_stock_customer.id
+                else:
+                    location_dest_id, supplierloc = self.sudo().env['stock.warehouse']._get_partner_locations()
+                delivery_carrier_id = False
+                if vals.get('carrier_code'):
+                    carrier_code = vals.get('carrier_code')
+                    delivery_carrier_id = self.sudo().env['delivery.carrier'].search([('carrier_code', '=', carrier_code)],limit=1)
+                do_id = self.sudo().env['stock.picking'].create({
+                                           'partner_id':res_partner_id.id,
+                                           'street':res_partner_id.street,
+                                           'city':res_partner_id.city,
+                                           'zip':res_partner_id.zip,
+                                           'country_id': res_partner_id.country_id.id,
+                                           'state_id': res_partner_id.state_id.id,
+                                           'po_order_number' : po_no,
+                                           'location_id':location_id,
+                                           'picking_type_id':picking_type_id.id,
+                                           'location_dest_id':location_dest_id,
+                                           'ref1':ref1,
+                                           'ref2':ref2,
+                                           'carrier_id':delivery_carrier_id and delivery_carrier_id.id or False,
+                                           'method_of_shipment':method_of_shipment,
+                                           'document_to_print':document_to_print,
+                                           'ship_from_company':ship_from_company,
+                                           'ship_from_address':ship_from_address,
+                                           'ship_date':date_ship,
+                                           'shipping_account_number':shipping_account_number,
+                                           'shipping_account_zip_code':shipping_account_zip_code,
+                                           'billing_type':billing_type,
+                                           'carrier_tracking_ref':carrier_tracking_ref,
+                                           'shipping_carrier':delivery_carrier_id and delivery_carrier_id.name or False,
+                                           'comments':comments
+                                           })
+                     
+                if do_id.name:
+                    if vals.get('shipping_label_url'):
+                        shipping_url = str(vals.get('shipping_label_url'))
+                        response = requests.get(shipping_url)
+                        with open('/tmp/shipping_label.pdf', 'wb') as f:
+                            f.write(response.content)
+                        attachment = {
+                                      'name': ('Shipping labels' "%s" %do_id.name),
+                                      'datas': base64.b64encode(response.content),
+                                      'datas_fname':do_id.name + ".pdf",
+                                      'res_model': 'stock.picking',
+                                      'type': 'binary',
+                                      'res_id': do_id.id
+                                    }
+                        do_id.ship_label_bool = True
+                        id = self.env['ir.attachment'].create(attachment)
+                    if vals.get('packing_list_urls'):
+                        packing_url = str(vals.get('packing_list_urls'))
+                        response = requests.get(packing_url)
+                        with open('/tmp/packing_label.pdf', 'wb') as f:
+                            f.write(response.content)
+                        attachment = {
+                                      'name': ('Packing List' "%s" %do_id.name),
+                                      'datas': base64.b64encode(response.content),
+                                      'datas_fname':do_id.name + ".pdf",
+                                      'res_model': 'stock.picking',
+                                      'type': 'binary',
+                                      'res_id': do_id.id
+                                    }
+                        id = self.env['ir.attachment'].create(attachment)
+                    if vals.get('invoice_urls'):
+                        invoice_url = str(vals.get('invoice_urls'))
+                        response = requests.get(invoice_url)
+                        with open('/tmp/invoice_label.pdf', 'wb') as f:
+                            f.write(response.content)
+                        attachment = {
+                                      'name': ('Invoices' "%s" %do_id.name),
+                                      'datas': base64.b64encode(response.content),
+                                      'datas_fname':do_id.name + ".pdf",
+                                      'res_model': 'stock.picking',
+                                      'type': 'binary',
+                                      'res_id': do_id.id
+                                    }
+                        id = self.env['ir.attachment'].create(attachment)
+                    for each in sku_list:
+                        product_ids = self.sudo().env['product.product'].search([('default_code','=',each[0])])
+                        if not product_ids:
+                            return {"status":"SKU does not exist"}
+                        stock_move_id = self.sudo().env['stock.move'].create({  'picking_id':do_id.id,
+                                                                                'product_id':product_ids.id,
+                                                                                'name':'test',
+                                                                                'product_uom_qty':each[1],
+                                                                                'product_uom':product_ids.uom_id.id,
+                                                                                'location_id':location_id,
+                                                                                'location_dest_id':location_dest_id,
+                                                                            })  
+        return {"status":"Do created","DO ID":do_id.id}  
+    
+    
+    @api.model
+    def api_fetch_record(self,vals): 
+        if vals.get('do_id'): 
+            do_obj = self.sudo().env['stock.picking'].browse(vals.get('do_id'))
+            track_data = method_ship = ''
+            if do_obj.carrier_tracking_ref:
+                track_data = do_obj.carrier_tracking_ref
+            if do_obj.method_of_shipment:
+                method_ship = do_obj.method_of_shipment
+            return {"Tracking NO.":track_data,"Method of Shipment":method_ship}
+        else:    
+            raise UserError(_("Record Does not Exist"))
+    
+    
+class StockMove(models.Model):
+    _inherit = "stock.move"
+    
+    pick_list_move = fields.Boolean("Pick List Bool")
+    
+     
+
+ 
+            
+
+
+
+

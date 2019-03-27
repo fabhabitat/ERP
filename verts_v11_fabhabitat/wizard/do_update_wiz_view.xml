@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<odoo>
+	<record id="do_update_wiz_form" model="ir.ui.view">
+		<field name="name">do.update.form</field>
+		<field name="model">do.update</field>
+		<field name="arch" type="xml">
+			<form string="Do Update">
+				<header>
+					<field name="barcode_sheet" />
+				</header>
+				<footer>
+					<button name="load_barcode_sheet" string="Update DO"
+						type="object" />
+					<button string="Cancel" class="btn btn-sm btn-default"
+						special="cancel" />
+				</footer>
+			</form>
+		</field>
+	</record>
+
+	<record id="do_update_action" model="ir.actions.act_window">
+		<field name="name">Do Update</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">do.update</field>
+		<field name="view_mode">form</field>
+		<field name="view_id" ref="do_update_wiz_form" />
+		<field name="target">new</field>
+	</record>
+
+
+</odoo>

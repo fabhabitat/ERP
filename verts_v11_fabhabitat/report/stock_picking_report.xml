@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<record id="paperformat_picklist" model="report.paperformat">
+			<field name="name">Pick List</field>
+			<field name="default" eval="True"/>
+			<field name="format">A4</field>
+			<field name="page_height">0</field>
+			<field name="page_width">0</field>
+			<field name="orientation">Landscape</field>
+			<field name="margin_top">40</field>
+			<field name="margin_bottom">28</field>
+			<field name="margin_left">7</field>
+			<field name="margin_right">7</field>
+			<field name="header_line" eval="False"/>
+			<field name="header_spacing">35</field>
+			<field name="dpi">90</field>
+		</record>
+		
+		<record id="paperformat_shippig_label" model="report.paperformat">
+			<field name="name">Shipping Label </field>
+			<field name="default" eval="True"/>
+			<field name="format">A6</field>
+			<field name="page_height">0</field>
+			<field name="page_width">0</field>
+			<field name="orientation">Portrait</field>
+			<field name="margin_top">20</field>
+			<field name="margin_bottom">15</field>
+			<field name="margin_left">7</field>
+			<field name="margin_right">7</field>
+			<field name="header_line" eval="False"/>
+			<field name="header_spacing">0</field>
+			<field name="dpi">90</field>
+		</record>
+		
+		<record id="paperformat_packing_list" model="report.paperformat">
+			<field name="name">Packing List</field>
+			<field name="default" eval="True"/>
+			<field name="format">A6</field>
+			<field name="page_height">0</field>
+			<field name="page_width">0</field>
+			<field name="orientation">Portrait</field>
+			<field name="margin_top">20</field>
+			<field name="margin_bottom">15</field>
+			<field name="margin_left">7</field>
+			<field name="margin_right">7</field>
+			<field name="header_line" eval="False"/>
+			<field name="header_spacing">0</field>
+			<field name="dpi">90</field>
+		</record>
+		
+		<record id="paperformat_invoices" model="report.paperformat">
+			<field name="name">Invoices</field>
+			<field name="default" eval="True"/>
+			<field name="format">A6</field>
+			<field name="page_height">0</field>
+			<field name="page_width">0</field>
+			<field name="orientation">Portrait</field>
+			<field name="margin_top">20</field>
+			<field name="margin_bottom">15</field>
+			<field name="margin_left">7</field>
+			<field name="margin_right">7</field>
+			<field name="header_line" eval="False"/>
+			<field name="header_spacing">0</field>
+			<field name="dpi">90</field>
+		</record>
+		
+		<!-- <report
+		id="pick_report_id1"
+		model="stock.picking"
+		string="Pick List"
+		report_type="qweb-pdf"
+		name="verts_v11_fabhabitat.pick_report_template"
+		file="verts_v11_fabhabitat.pick_report_template"
+		paperformat="paperformat_picklist" /> -->
+		
+		<report
+		id="shipping_label_report_id"
+		model="stock.picking"
+		string="Shipping Label"
+		report_type="qweb-pdf"
+		name="verts_v11_fabhabitat.report_shipping_label"
+		file="verts_v11_fabhabitat.report_shipping_label"
+		paperformat="paperformat_shippig_label"
+		/>
+		
+		<report
+		id="packing_list_report_id"
+		model="stock.picking"
+		string="Packing List"
+		report_type="qweb-pdf"
+		name="verts_v11_fabhabitat.report_packing_list_document"
+		file="verts_v11_fabhabitat.report_packing_list_document"
+		paperformat="paperformat_packing_list"
+		/>
+		
+		<report
+		id="invoices_report_id"
+		model="stock.picking"
+		string="Invoices"
+		report_type="qweb-pdf"
+		name="verts_v11_fabhabitat.report_invoices_document"
+		file="verts_v11_fabhabitat.report_invoices_document"
+		paperformat="paperformat_invoices"
+		/>
+		
+		<report
+		id="pick_up_list_report_id1"
+		model="stock.picking"
+		string="Pick List"
+		report_type="qweb-pdf"
+		name="verts_v11_fabhabitat.pick_up_list_report_template"
+		file="verts_v11_fabhabitat.pick_up_list_report_template"
+		paperformat="paperformat_picklist"
+		 />
+		 
+		 <report
+		id="multiple_pick_up_list_report_id"
+		model="pick.list"
+		string="Pick List"
+		report_type="qweb-pdf"
+		name="verts_v11_fabhabitat.multiple_pick_up_list_report_template"
+		file="verts_v11_fabhabitat.multiple_pick_up_list_report_template"
+		paperformat="paperformat_picklist"
+		 />
+		
+	</data>
+</odoo>

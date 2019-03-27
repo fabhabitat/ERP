@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<odoo>
+	<record id="validate_order_wiz_form" model="ir.ui.view">
+		<field name="name">validate.incomig.order.form</field>
+		<field name="model">validate.incomig.order</field>
+		<field name="arch" type="xml">
+			<form string="Validate Order">
+				<footer>
+					<button name="validate_incoming_order" string="Validate DO" type="object" class="btn
+						btn-sm btn-primary"/>
+					<button string="Cancel" class="btn btn-sm btn-default" special="cancel"/>
+				</footer>
+			</form>
+		</field>
+	</record>
+	
+	<record id="validate_order_action" model="ir.actions.act_window">
+		<field name="name">Validate Order</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">validate.incomig.order</field>
+		<field name="view_mode">form</field>
+		<field name="view_id" ref="validate_order_wiz_form"/>
+		<field name="target">new</field>
+	</record>
+	
+	
+	<act_window id="action_validate_incoming_wiz" name="Validate DO" multi="True"
+		key2="client_action_multi" res_model="validate.incomig.order" src_model="stock.picking"
+		view_mode="form" target="new" view_type="form"/>
+</odoo>

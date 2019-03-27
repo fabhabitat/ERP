@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="report_invoices_document">
+			<t t-call="web.internal_layout">
+				<t t-foreach="docs" t-as="o">
+				<div class="col-xs-4">
+					<table style="border-spacing:0;margin-bottom:0;width: 100%;"
+					class="table">
+						<tr>
+							<td valign="top" align="right">
+								<img style="max-height:40px;" t-att-src="'data:image/png;base64,%s' % o.company_id.logo" t-if="o.company_id.logo"/>
+							</td>
+						</tr>
+						<tr t-attf-style="font-size=15px;">
+							<td valign="top" align="left">
+								Invoice No:<t t-if="o.invoice_id"><span t-raw="o.invoice_id.number" /></t>
+								<br />
+								Date:<t t-if="o.invoice_id"><span t-raw="o.invoice_id.date_invoice" /></t>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<table style="border-spacing:0;margin-bottom:0;width: 100%;" class="table" border="1">
+					<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px; border:1 solid #888;">
+						<td align="center" width="50%" valign="top">
+							<b>
+								<span>Billing Address</span>
+							</b>
+						</td>
+						<td align="center" wi1th="50%" valign="top">
+							<b>
+								<span>Shipping Address</span>
+							</b>
+						</td>
+					</tr>
+					<tr t-attf-style="font-size:11px; border:1 solid #888;">
+						<td align="left" width="50%" valign="top">
+							<span t-raw="o.partner_id.street" /><br/>
+							<span t-raw="o.partner_id.city" /><br/>
+							<span t-raw="o.partner_id.zip" /><br/>
+							<span t-raw="o.partner_id.country_id.name" /><br/>
+						</td>
+						<td align="left" width="50%" valign="top">
+							<span t-raw="o.partner_id.street" /><br/>
+							<span t-raw="o.partner_id.city" /><br/>
+							<span t-raw="o.partner_id.zip" /><br/>
+							<span t-raw="o.partner_id.country_id.name" /><br/>
+						</td>
+					</tr>
+				</table>
+				<p />
+				<table style="border-spacing:0;margin-bottom:0;width: 100%;" class="table table-bordered" border="1">
+					<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px; border:1 solid #888;">
+						<td align="center" valign="top" width="50%">
+							<b>
+								<span>Payment Information</span>
+							</b>
+						</td>
+						<td align="center" width="50%" valign="top">
+							<b>
+								<span>Shipping information</span>
+							</b>
+						</td>
+					</tr>
+					<tr t-attf-style="font-size:11px;">
+						<td align="left" width="50%" valign="top">
+							Purchase Order No.<span t-raw="o.po_order_number" /><br/>
+							Due Date:<t t-if="o.invoice_id"><span t-raw="o.invoice_id.date_due" /></t><br/>
+							Terms: n/a
+							<p />
+							<strong>Please note that our address has changed</strong>
+							<br />
+							<strong>Send Payment To:</strong>
+							<br />
+							<strong>Fab Habitat</strong>
+							<br />
+							49 Hubbard Ave
+							<br />
+							Red Bank, NJ 07701
+							<br />
+						</td>
+						<td align="left" width="50%" valign="top">
+							[[Shippping Plan Name]]
+							<table style="border-spacing:0;margin-bottom:0;width: 100%;" class="table">
+								<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px;">
+									<td align="center" width="50%">
+										<b>
+											<span>Carrier</span>
+										</b>
+									</td>
+									<td align="center" width="50%">
+										<b>
+											<span>Tracking No.</span>
+										</b>
+									</td>
+								</tr>
+								<tr>
+									<td align="center" width="50%">
+										<span t-raw="o.shipping_carrier" />
+									</td>
+									<td align="center" width="50%">
+										<span t-raw="o.shipping_account_number" />
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				<p />
+				<p />
+				<table style="border-spacing:0;margin-bottom:0;width: 100%;" border="1" class="table">
+					<tr t-attf-style="padding:5px 10px; background-color:#1674b1; color:#fff; font-size:13px;">
+						<td align="left" width="40%" valign="top">
+							<b>
+								<span>Product</span>
+							</b>
+						</td>
+						<td align="left" wi1th="10%" valign="top">
+							<b>
+								<span>SKU</span>
+							</b>
+						</td>
+						<td align="left" width="10%" valign="top">
+							<b>
+								<span>Qty</span>
+							</b>
+						</td>
+						<td align="left" width="10%" valign="top">
+							<b>
+								<span>Price</span>
+							</b>
+						</td>
+						<td align="left" width="10%" valign="top">
+							<b>
+								<span>Tax</span>
+							</b>
+						</td>
+						<td align="left" width="20%" valign="top">
+							<b>
+								<span>Total</span>
+							</b>
+						</td>
+					</tr>
+					<t t-if="o.invoice_id">
+						<t t-foreach="o.invoice_id.invoice_line_ids" t-as="l">
+					<tr t-attf-style="font-size:11px;">
+						<td align="left" width="40%" valign="top"><span t-raw="l.product_id.name" /></td>
+						<td align="left" wi1th="10%" valign="top"><span t-raw="l.product_id.default_code" /></td>
+						<td align="left" width="10%" valign="top"><span t-raw="l.quantity" /></td>
+						<td align="left" width="10%" valign="top"><span t-raw="l.price_unit" /></td>
+						<td align="left" width="10%" valign="top"><span t-esc="', '.join(map(lambda x: (x.description or x.name), l.invoice_line_tax_ids))"/></td>
+						<td align="left" width="20%" valign="top"><span t-raw="l.price_subtotal" t-options='{"widget": "monetary", "display_currency": o.invoice_id.currency_id}'/></td>
+					</tr>
+					</t>
+					</t>
+				</table>
+			</t>
+		</t>
+	</template>
+</odoo>

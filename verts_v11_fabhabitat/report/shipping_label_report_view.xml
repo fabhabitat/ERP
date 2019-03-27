@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<template id="report_shipping_label_document">
+		<t t-foreach="docs" t-as="o">
+			<t t-call="web.external_layout">
+
+				<div class="page">
+					<center>
+						<h3>
+							<span>
+								<b>
+									<u>Shipping Label</u>
+								</b>
+							</span>
+						</h3>
+					</center>
+				</div>
+				<div class="col-xs-4">
+					<img style="max-height: 80px;" t-att-src="'data:image/png;base64,%s' % o.company_id.logo" t-if="o.company_id.logo"/>
+				</div>
+				<table style="border-spacing:0;margin-bottom:0;width: 1000px;"
+				class="table"></table>
+			</t>
+		</t>
+	</template>
+	<template id="report_shipping_label">
+		<t t-call="web.html_container">
+			<t t-foreach="docs" t-as="doc">
+				<t t-call="verts_v11_fabhabitat.report_shipping_label_document" />
+			</t>
+		</t>
+	</template>
+
+</odoo>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+	<data>
+
+		<!-- Add instructor field to existing view via inherit -->
+		<record model="ir.ui.view" id="view_picking_form_inherit">
+			<field name="name">stock.picking.form</field>
+			<field name="model">stock.picking</field>
+			<field name="inherit_id" ref="stock.view_picking_form" />
+			<field name="arch" type="xml">
+
+				<xpath expr="//field[@name='partner_id']" position="after">
+					<label for="street" string="Address" />
+					<div class="o_address_format">
+						<field name="street" placeholder="Street..."
+							class="o_address_street" />
+						<field name="street2" placeholder="Street 2..."
+							class="o_address_street" />
+						<field name="city" placeholder="City" class="o_address_city" />
+						<field name="state_id" class="o_address_state"
+							placeholder="State" options='{"no_open": True}' />
+						<field name="zip" placeholder="ZIP" class="o_address_zip" />
+						<field name="country_id" placeholder="Country"
+							class="o_address_country"
+							options='{"no_open": True, "no_create": True}' />
+					</div>
+					<field name="customer_zip_code" />
+				</xpath>
+				<xpath expr="//field[@name='origin']" position="after">
+					<field name="po_order_number" />
+					<field name="invoice_id"
+						options="{'no_create': True, 'no_open': True}" />
+				</xpath>
+
+				<xpath expr="//field[@name='customer_zip_code']"
+					position="after">
+					<field name="invoice_required" />
+				</xpath>
+
+				<xpath expr="//field[@name='origin']" position="after">
+					<field name="packing_list_required" />
+				</xpath>
+
+				<xpath expr="//field[@name='priority']" position="after">
+					<field name="shipping_carrier" />
+					<field name="shipping_account_number" />
+					<field name="ship_date" />
+					<field name="shipping_account_zip_code" />
+					<field name="billing_type" />
+					<!-- <field name="shipping_weight" /> -->
+					<field name="shipper_package_code" />
+					<field name="ref1" />
+					<field name="ref2" />
+					<field name="method_of_shipment" />
+					<field name="ship_label_bool" />
+					<field name="tracking_no" invisible="1" />
+					<field name="document_to_print" />
+					<field name="ship_from_company" />
+					<field name="ship_from_address" />
+					<field name="comments" />
+				</xpath>
+			</field>
+		</record>
+
+
+		<record id="stock_view_picking_internal_search_inherit"
+			model="ir.ui.view">
+			<field name="name">stock.picking.internal.search</field>
+			<field name="model">stock.picking</field>
+			<field name="inherit_id"
+				ref="stock.view_picking_internal_search" />
+			<field name="arch" type="xml">
+
+				<xpath expr="//field[@name='product_id']"
+					position="attributes">
+					<attribute name="string">Product/SKU</attribute>
+				</xpath>
+				<xpath expr="//field[@name='partner_id']" position="after">     <!--used for......search view -->
+					<field name="zip" />
+					<field name="shipping_carrier" />
+				</xpath>
+				<xpath expr="//filter[@name='picking_type']" position="before"> <!--used for......filter and group by view -->
+					<filter name="customer_zip_code" string="Shipping Zip Code"
+						domain="[]" context="{'group_by':'zip'}" />
+					<filter name="shipping_carrier"
+						string="Shipping Carrier Name" domain="[]"
+						context="{'group_by':'shipping_carrier'}" />
+				</xpath>
+			</field>
+		</record>
+
+		<record id="vpicktree_inherit_stock_picking_fabhabitat"
+			model="ir.ui.view">
+			<field name="name">stock.picking.tree</field>
+			<field name="model">stock.picking</field>
+			<field name="inherit_id" ref="stock.vpicktree" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='origin']" position="after">
+					<field name="pick_list_print_bool" />
+					<field name="packing_list_print_bool" />
+					<field name="invoice_print_bool" />
+					<field name="shipping_label_print_bool" />
+					<field name="carrier_id" />
+					<field name="packing_list_required" />
+					<field name="invoice_required" />
+				</xpath>
+			</field>
+		</record>
+	</data>
+
+	<menuitem id="menu_upload_do" name="Upload DO"
+		parent="stock.menu_stock_warehouse_mgmt" action="do_update_action"
+		sequence="2" />
+
+</odoo>
