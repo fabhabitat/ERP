@@ -57,7 +57,7 @@
 								</td>
 								<td style="border: 1px solid black; width: 10%;"
 									align="center">
-									<strong>SKU</strong>
+									<strong>UPC</strong>
 								</td>
 								<td style="border: 1px solid black; width: 20%;"
 									align="center">
@@ -65,11 +65,11 @@
 								</td>
 								<td style="border: 1px solid black; width: 30%;"
 									align="center">
-									<strong>SKU Name</strong>
+									<strong>UPC Name</strong>
 								</td>
 								<td style="border: 1px solid black; width: 15%;"
 									align="center">
-									<strong>Quantity</strong>
+									<strong>QTY</strong>
 								</td>
 								<td style="border: 1px solid black; width: 20%;"
 									align="center">
